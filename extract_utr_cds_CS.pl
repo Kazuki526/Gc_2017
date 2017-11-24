@@ -50,12 +50,14 @@ open(OUTLDO,"|gzip -c >$out_dir/CSD_lc_notrepr.fa.gz");
 foreach my $chr_fa(@chr_fa){
 		my %fasta=&fasta2hash("$ge_dir$chr_fa");
 		if(scalar(keys %fasta) !=1){die "ERROR::$chr_fa have more than one fasta file\n".keys(%fasta)."\n";}
-		my $chr=keys %fasta;
+		my @chr=keys %fasta;my$chr=$chr[0];
+		if(scalar(keys(%{$hc_gff{$chr}}))==0){die "$chr hc_gff have no data?\n";}else{print "doing $chr\n";}
 		foreach my $tr_id(keys %{$hc_gff{$chr}}){
-				my ($strand,$utr5_inf,$cds_inf,$utr3_inf)=
-					($hc_gff{$chr}{$tr_id}{strand},$hc_gff{$chr}{$tr_id}{'5utr_inf'},
-					 $hc_gff{$chr}{$tr_id}{cds}   ,$hc_gff{$chr}{$tr_id}{'3utr_inf'});
-				my ($utr5,$utr3)=("","");
+				print "$tr_id\n";
+				my ($strand,$cds_inf)=($hc_gff{$chr}{$tr_id}{strand},$hc_gff{$chr}{$tr_id}{cds});
+				my ($utr5,$utr5_inf,$utr3,$utr3_inf)=("","","","");
+				if(defined $hc_gff{$chr}{$tr_id}{'5utr_inf'}){$utr5_inf=$hc_gff{$chr}{$tr_id}{'5utr_inf'};}
+				if(defined $hc_gff{$chr}{$tr_id}{'3utr_inf'}){$utr3_inf=$hc_gff{$chr}{$tr_id}{'3utr_inf'};}
 				my $cds=$hc_cds{$tr_id};
 				if(defined $hc_gff{$chr}{$tr_id}{'5utr'}){
 						my @utr=split(/;/,$hc_gff{$chr}{$tr_id}{'5utr'});
@@ -79,26 +81,32 @@ foreach my $chr_fa(@chr_fa){
 				if(defined $hc_gff{$chr}{$tr_id}{repr}){
 						if($chr=~/A$/){
 								print OUTHA ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
+								print ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
 						}elsif($chr=~/B$/){
 								print OUTHB ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
+								print ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
 						}elsif($chr=~/D$/){
 								print OUTHD ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
-						}
+								print ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
+						}else{die "ERROR::what chr?? $chr\n";}
 				}else{
 						if($chr=~/A$/){
 								print OUTHAO ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
+								print ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
 						}elsif($chr=~/B$/){
 								print OUTHBO ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
+								print ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
 						}elsif($chr=~/D$/){
 								print OUTHDO ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
+								print ">$tr_id $strand;$utr5_inf;$cds_inf;$utr3_inf;\n$utr5$cds$utr3\n"; 
 						}
-				}
+				}die"finish";
 		}
 		foreach my $tr_id(keys %{$lc_gff{$chr}}){
-				my ($strand,$utr5_inf,$cds_inf,$utr3_inf)=
-					($lc_gff{$chr}{$tr_id}{strand},$lc_gff{$chr}{$tr_id}{'5utr_inf'},
-					 $lc_gff{$chr}{$tr_id}{cds}   ,$lc_gff{$chr}{$tr_id}{'3utr_inf'});
-				my ($utr5,$utr3)=("","");
+				my ($strand,$cds_inf)=($lc_gff{$chr}{$tr_id}{strand},$lc_gff{$chr}{$tr_id}{cds});
+				my ($utr5,$utr5_inf,$utr3,$utr3_inf)=("","","","");
+				if(defined $lc_gff{$chr}{$tr_id}{'5utr_inf'}){$utr5_inf=$lc_gff{$chr}{$tr_id}{'5utr_inf'};}
+				if(defined $lc_gff{$chr}{$tr_id}{'3utr_inf'}){$utr3_inf=$lc_gff{$chr}{$tr_id}{'3utr_inf'};}
 				my $cds=$lc_cds{$tr_id};
 				if(defined $lc_gff{$chr}{$tr_id}{'5utr'}){
 						my @utr=split(/;/,$lc_gff{$chr}{$tr_id}{'5utr'});
@@ -175,6 +183,7 @@ sub pick_representative_trid( $ ){
 						die "ERROR::$repr_path have wrong fasta file? what this line?\n$_\n";
 				}
 		}
+		close FA;
 		return(%repr);
 }
 
@@ -183,26 +192,36 @@ sub extract_cdsutr_region_from_gff( $ ){
 		my $gff_path=$_[0];
 		open(GFF,"unzip -p $gff_path|");
 		my %gff=();
+		my $l=0;
 		while(<GFF>){
-				chomp;
+				chomp;$l++;
 				my @line=split(/\t/,);
 				my %info=map{my @inf=split(/=/,$_);($inf[0],$inf[1])}split(/;/,$line[8]);
-				if($line[2] eq "exon"||$line[2] eq "gene"){next;
+				if($line[2] eq "exon" || $line[2] eq "gene"){next;
 				}elsif($line[2] eq "mRNA"){
 						if($info{ID}!~/^$info{Parent}\.\d+$/){print "$info{Parent} transcript_id $info{ID} is not same ids\n";$gene_name_forcal++;}
 						$gff{$line[0]}{$info{ID}}{gene}=$info{Parent};
 						$gff{$line[0]}{$info{ID}}{strand}=$line[6];
 						if(defined $repr{$info{ID}}){$gff{$line[0]}{$info{ID}}{repr}="yes";}
+						$gff{$line[0]}{$info{Parent}}{'5utr'}="";
+						$gff{$line[0]}{$info{Parent}}{'5utr_inf'}="";
+						$gff{$line[0]}{$info{Parent}}{'cds'}="";
+						$gff{$line[0]}{$info{Parent}}{'3utr'}="";
+						$gff{$line[0]}{$info{Parent}}{'3utr_inf'}="";
 				}elsif($line[2] eq "five_prime_UTR"){
-						$gff{$line[0]}{$info{Parent}}{'5utr'}="$line[3]-$line[4];";
-						$gff{$line[0]}{$info{Parent}}{'5utr_inf'}=$line[4]-$line[3]+1 .",";
+						my $length=$line[4] - $line[3] +1;
+						$gff{$line[0]}{$info{Parent}}{'5utr'}.="$line[3]-$line[4];";
+						$gff{$line[0]}{$info{Parent}}{'5utr_inf'}.="$length,";
 				}elsif($line[2] eq "CDS"){
-						$gff{$line[0]}{$info{Parent}}{'cds'}=$line[4]-$line[3]+1 .",";
+						my $length=$line[4] - $line[3] +1;
+						$gff{$line[0]}{$info{Parent}}{'cds'}.="$length,";
 				}elsif($line[2] eq "three_prime_UTR"){
-						$gff{$line[0]}{$info{Parent}}{'3utr'}="$line[3]-$line[4];";
-						$gff{$line[0]}{$info{Parent}}{'3utr_inf'}=$line[4]-$line[3]+1 .",";
+						my $length=$line[4] - $line[3] +1;
+						$gff{$line[0]}{$info{Parent}}{'3utr'}.="$line[3]-$line[4];";
+						$gff{$line[0]}{$info{Parent}}{'3utr_inf'}.="$length,";
 				}else{die "ERROR::what gff line?\n$_\n";}
 		}
+		close GFF;
 		return(%gff);
 }
 #############################################################################################
