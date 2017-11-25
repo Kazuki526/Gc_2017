@@ -52,7 +52,10 @@ foreach my $chr_fa(@chr_fa){
 		if(scalar(keys %fasta) !=1){die "ERROR::$chr_fa have more than one fasta file\n".keys(%fasta)."\n";}
 		my @chr=keys %fasta;my$chr=$chr[0];
 		if(scalar(keys(%{$hc_gff{$chr}}))==0){die "$chr hc_gff have no data?\n";}else{print "doing $chr\n";}
+		my $l=0;
 		foreach my $tr_id(sort(keys %{$hc_gff{$chr}})){
+				$l++;
+				if($l%100==0){ print "$tr_id now\n";}
 				my ($strand,$cds_inf)=($hc_gff{$chr}{$tr_id}{strand},$hc_gff{$chr}{$tr_id}{cds});
 				my ($utr5,$utr5_inf,$utr3,$utr3_inf)=("","","","");
 				if(defined $hc_gff{$chr}{$tr_id}{'5utr_inf'}){$utr5_inf=$hc_gff{$chr}{$tr_id}{'5utr_inf'};}
