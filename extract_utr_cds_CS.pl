@@ -66,18 +66,18 @@ foreach my $chr_fa(@chr_fa){
 						foreach my $utr(@utr){
 								my ($start,$end)=split(/-/,$utr);
 								if($strand eq "+"){
-										$utr5.=substr($fasta{$chr}{sequence},$start-1,$end-1);
+										$utr5.=substr($fasta{$chr}{sequence},$start-1,$end - $start +1);
 								}else{
-										$utr5.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end-1));
+										$utr5.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end - $start +1));
 								}}
 				}elsif(defined $hc_gff{$chr}{$tr_id}{'3utr'}){
 						my @utr=split(/;/,$hc_gff{$chr}{$tr_id}{'3utr'});
 						foreach my $utr (@utr){
 								my ($start,$end)=split(/-/,$utr);
 								if($strand eq "+"){
-										$utr3.=substr($fasta{$chr}{sequence},$start-1,$end-1);
+										$utr3.=substr($fasta{$chr}{sequence},$start-1,$end - $start +1);
 								}else{
-										$utr3.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end-1));
+										$utr3.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end - $start +1));
 								}}
 				}
 				if(defined $hc_gff{$chr}{$tr_id}{repr}){
@@ -109,18 +109,18 @@ foreach my $chr_fa(@chr_fa){
 						foreach my $utr(@utr){
 								my ($start,$end)=split(/-/,$utr);
 								if($strand eq "+"){
-										$utr5.=substr($fasta{$chr}{sequence},$start-1,$end-1);
+										$utr5.=substr($fasta{$chr}{sequence},$start-1,$end - $start +1);
 								}else{
-										$utr5.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end-1));
+										$utr5.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end - $start +1));
 								}}
 				}elsif(defined $lc_gff{$chr}{$tr_id}{'3utr'}){
 						my @utr=split(/;/,$lc_gff{$chr}{$tr_id}{'3utr'});
 						foreach my $utr (@utr){
 								my ($start,$end)=split(/-/,$utr);
 								if($strand eq "+"){
-										$utr3.=substr($fasta{$chr}{sequence},$start-1,$end-1);
+										$utr3.=substr($fasta{$chr}{sequence},$start-1,$end - $start +1);
 								}else{
-										$utr3.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end-1));
+										$utr3.= &reverse_trans(substr($fasta{$chr}{sequence},$start-1,$end - $start +1));
 								}}
 				}
 				if(defined $lc_gff{$chr}{$tr_id}{repr}){
