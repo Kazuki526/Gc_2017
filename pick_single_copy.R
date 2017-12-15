@@ -35,7 +35,7 @@ perfectly_singlecopy = .blast %>%
   dplyr::select(-n)
 print(paste0(.genome," genome perfectrly singlecopy CDS = ",length(perfectly_singlecopy$qid),
              ", and sum of length = ",sum(perfectly_singlecopy$cds_length)))
-write_df(perfectly_singlecopy,"singlecopy_CS_cds/perfectly_singlecopy_",.genome,".tsv")
+write_df(perfectly_singlecopy,paste0("singlecopy_CS_cds/perfectly_singlecopy_",.genome,".tsv"))
 mostly_singlecopy = .blast %>%
   dplyr::filter(match_per >90,align_length > 50) %>%
   dplyr::count(qid) %>%
