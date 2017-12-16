@@ -23,7 +23,10 @@ d2d=read_tsv("CS_cds/blastDHL2DHL.tsv",col_names = c("qid","dbid","match_per","a
                                                              "q_start","q_end","db_start","db_end","evalue","bitscore"))
 pick_singlecopy=function(.blast,.genome){
 cds_length = .blast %>%
-  dplyr::filter(qid==dbid) %>%
+  dplyr::filter(qid==dbid,match_per==100) %>%
+  dplyr::group_by(qid) %>%
+  dplyr::filter(align_length==max(align_length)) %>%
+  ungroup() %>%
   dplyr::select(qid,align_length) %>%
   dplyr::rename(id=qid,cds_length=align_length)
 print(paste0(.genome," genome whole CDS number = ",length(cds_length$id),
@@ -33,7 +36,7 @@ perfectly_singlecopy = .blast %>%
   dplyr::filter(n==1) %>%
   dplyr::left_join(cds_length,by=c(qid="id")) %>%
   dplyr::select(-n)
-print(paste0(.genome," genome perfectrly singlecopy CDS = ",length(perfectly_singlecopy$qid),
+print(paste0(.genome," genome perfectly singlecopy CDS = ",length(perfectly_singlecopy$qid),
              ", and sum of length = ",sum(perfectly_singlecopy$cds_length)))
 write_df(perfectly_singlecopy,paste0("singlecopy_CS_cds/perfectly_singlecopy_",.genome,".tsv"))
 mostly_singlecopy = .blast %>%
@@ -41,8 +44,8 @@ mostly_singlecopy = .blast %>%
   dplyr::count(qid) %>%
   dplyr::filter(n==1) %>%
   dplyr::left_join(cds_length,by=c(qid="id")) %>%
-  dplyr::select(-n)
-print(paste0(.genome," genome perfectrly singlecopy CDS = ",length(mostly_singlecopy$qid),
+  dplyr::select(-n) 
+print(paste0(.genome," genome mostly singlecopy CDS = ",length(mostly_singlecopy$qid),
              ", and sum of length = ",sum(mostly_singlecopy$cds_length)))
 write_df(mostly_singlecopy,paste0("singlecopy_CS_cds/mostly_singlecopy_",.genome,".tsv"))
 }
