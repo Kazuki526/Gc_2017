@@ -27,6 +27,21 @@ print "blast between A & B print out $blast_out\n";
 print "blast between A & D print out $blast_out\n";
 `blastn -db $sing_dir/DB/singlecopyD -query $a_fasta -out $blast_out -outfmt 6 -evalue 1e-6`;
 
+ $blast_out = "$sing_dir/blast_B2A_$filter.tsv";
+print "blast between B & A print out $blast_out\n";
+`blastn -db $sing_dir/DB/singlecopyA -query $b_fasta -out $blast_out -outfmt 6 -evalue 1e-6`;
+ $blast_out = "$sing_dir/blast_B2D_$filter.tsv";
+print "blast between B & D print out $blast_out\n";
+`blastn -db $sing_dir/DB/singlecopyD -query $b_fasta -out $blast_out -outfmt 6 -evalue 1e-6`;
+
+ $blast_out = "$sing_dir/blast_D2B_$filter.tsv";
+print "blast between D & B print out $blast_out\n";
+`blastn -db $sing_dir/DB/singlecopyB -query $d_fasta -out $blast_out -outfmt 6 -evalue 1e-6`;
+ $blast_out = "$sing_dir/blast_D2A_$filter.tsv";
+print "blast between D & A print out $blast_out\n";
+`blastn -db $sing_dir/DB/singlecopyA -query $d_fasta -out $blast_out -outfmt 6 -evalue 1e-6`;
+
+exit;
 ###############################################################################
 sub make_fasta( $ ){
 		my $genome = uc $_[0];
@@ -37,7 +52,7 @@ sub make_fasta( $ ){
 		my %hlc_fa = &fasta2hash($HLmix_fasta_file);
 		open(IN,"$cdsid_file") or die "ERROR::problem with $cdsid_file\n";
 		<IN>; #remove header line
-		my $out_fasta = "$sing_dir/$filter" . "singlecopy" . $genome . ".fa"
+		my $out_fasta = "$sing_dir/$filter" . "singlecopy" . $genome . ".fa";
 		open(OUT,">$out_fasta");
 		while(<IN>){
 				chomp;
