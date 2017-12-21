@@ -82,9 +82,12 @@ matched_list = blast1 %>% dplyr::rename(aid=qid,bid=dbid,b_match=match_per,b_ali
   dplyr::filter(!is.na(bid),!is.na(did))
 
 matched_cds = matched_list %>%
+  dplyr::filter(a_start_2b < 20,a_start_2d < 20,b_start < 20,d_start < 20,
+                a_end_2b > a_length-20,a_end_2d > a_length-20,b_end > b_length-20,d_end > d_length-20)
+
+matched_cds_95 = matched_list %>%
   dplyr::filter(a_length * 0.95 < b_align_length, a_length * 0.95 < d_align_length,
                 b_length * 0.95 < b_align_length, d_length * 0.95 < d_align_length)
-
 matched_region = matched_list %>%
   dplyr::mutate(a_start=ifelse(a_start_2b > a_start_2d,a_start_2b,a_start_2d),
                 a_end=ifelse(a_end_2b < a_end_2d,a_end_2b,a_end_2d)) %>%
@@ -93,10 +96,14 @@ matched_region = matched_list %>%
 print(paste0(single_filter," singlecopy cds align result"))
 print(paste0("High&Low conf: matches to each other CDS = ",length(matched_region$a_length)," genes"))
 print(paste0("               and sum of matched region = ",sum(matched_region$a_length)," bp"))
+print(paste0("High&Low conf: CDS length 95% matches to each other CDS = ",length(matched_cds_95$a_length)," genes"))
+print(paste0("               and its length = ",sum(matched_cds_95$a_length), " bp"))
 print(paste0("High&Low conf: CDS length 95% matches to each other CDS = ",length(matched_cds$a_length)," genes"))
 print(paste0("               and its length = ",sum(matched_cds$a_length), " bp"))
 
 matched_cdsh = matched_cds %>%
+  dplyr::filter(!str_detect(aid,"LC"),!str_detect(bid,"LC"),!str_detect(did,"LC"))
+matched_cdsh_95 = matched_cds_95 %>%
   dplyr::filter(!str_detect(aid,"LC"),!str_detect(bid,"LC"),!str_detect(did,"LC"))
 matched_regionh = matched_region %>%
   dplyr::filter(!str_detect(aid,"LC"),!str_detect(bid,"LC"),!str_detect(did,"LC"))
@@ -104,9 +111,11 @@ matched_regionh = matched_region %>%
 print(paste0(single_filter," singlecopy cds align result"))
 print(paste0("only High conf: matches to each other CDS = ",length(matched_regionh$a_length)," genes"))
 print(paste0("                and sum of matched region = ",sum(matched_regionh$a_length)," bp"))
-print(paste0("only High conf: CDS length 95% matches to each other CDS = ",length(matched_cdsh$a_length)," genes"))
+print(paste0("only High conf: CDS length 95% matches to each other CDS = ",length(matched_cdsh_95$a_length)," genes"))
+print(paste0("                and its length = ",sum(matched_cdsh_95$a_length), " bp"))
+print(paste0("only High conf: all site CDS matches to each other CDS = ",length(matched_cdsh$a_length)," genes"))
 print(paste0("                and its length = ",sum(matched_cdsh$a_length), " bp"))
 
-print(paste0("make singlecopy_CS_cds/",single_filter,"_singlecopy_all_aligned.tsv (only high conf & 95% matched)"))
+print(paste0("make singlecopy_CS_cds/",single_filter,"_singlecopy_all_aligned.tsv (only high conf & all matched)"))
 write_df(matched_cdsh,paste0("singlecopy_CS_cds/",single_filter,"_singlecopy_all_aligned.tsv"))
 
