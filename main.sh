@@ -42,8 +42,9 @@ echo "extract ABD all matched sequence"
 Rscript extract_all_aligned_cds.R perfectly
 Rscript extract_all_aligned_cds.R mostly
 
-perl check_all_aligned_cds_out_distinct_region.pl singlecopy_CS_cds/perfectly_singlecopy_all_aligned.tsv
+#perl check_all_aligned_cds_out_distinct_region.pl singlecopy_CS_cds/perfectly_singlecopy_all_aligned.tsv
 perl check_all_aligned_cds_out_same_region.pl singlecopy_CS_cds/perfectly_singlecopy_all_aligned.tsv
 
-
+#print out ABD_identical.fa
+perl pick_ABD_identical_fa.pl ABD_identical_remove_same_seq.tsv
 

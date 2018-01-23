@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-##useage## perl check_all_aligned_cds_descriminate.pl ALL_ALIGNED.TSV ########
+##useage## perl check_all_aligned_cds_out_same_region.pl ALL_ALIGNED.TSV ########
 
 my $all_aligned =$ARGV[0];
 -e $all_aligned or die "ERROR::not exist input $all_aligned\n";
@@ -20,7 +20,9 @@ for(my $i=0;@header>$i;$i++){
 }
 my ($outfa,$outnum,$outnucle)=("temporary.fa",0,0);
 open(OUT,">ABD_identical_remove_same_seq.tsv");
+open(OUTPOSI,">ABD_identical_aligned_position.tsv");
 print OUT "aid\tbid\tdid\ta_length\tb_length\td_length\taligned_length\tsame_region\tdistinguishable_length\n";
+print OUTPOSI "chr\talined_posi\tposi\n";
 while(<IN>){
 		chomp;
 		my @line = split(/\t/,);
@@ -33,9 +35,22 @@ while(<IN>){
 		my ($afa,$bfa,$dfa) = ($multiple_aligned{$aid}{seq},$multiple_aligned{$bid}{seq},$multiple_aligned{$did}{seq});
 		my $focal = 0;
 		my @error_start=();
-		for(my $i=0;length($afa) - 100 >$i;$i++){
-				if((substr($afa,$i,100) eq substr($bfa,$i,100))||(substr($bfa,$i,100) eq substr($dfa,$i,100))||(substr($dfa,$i,100) eq substr($afa,$i,100))){
-						$focal++;push(@error_start,$i);
+		my ($aposi,$bposi,$dposi) = (0,0,0);
+		for(my $alined=1;length($afa) - 1 >$alined;$alined++){
+				my($aposi_out,$bposi_out,$dposi_out);
+				if(substr($afa,$alined,1) ne "-"){$aposi++;$aposi_out=$aposi;}else{$aposi_out="NA";}
+				if(substr($bfa,$alined,1) ne "-"){$bposi++;$bposi_out=$bposi;}else{$bposi_out="NA";}
+				if(substr($dfa,$alined,1) ne "-"){$dposi++;$dposi_out=$dposi;}else{$dposi_out="NA";}
+				if((substr($afa,$alined-1,100) eq substr($bfa,$alined-1,100))||
+				   (substr($bfa,$alined-1,100) eq substr($dfa,$alined-1,100))||
+				   (substr($dfa,$alined-1,100) eq substr($afa,$aliend-1,100))){
+						$focal++;push(@error_start,$alined);
+				}elsif(($alined < 100)&&((substr($afa,0,$alined) eq substr($bfa,0,$alined))||
+										 (substr($bfa,0,$alined) eq substr($dfa,0,$alined))||
+										 (substr($dfa,0,$alined) eq substr($afa,0,$aliend)))){
+						$focal++;push(@error_start,$alined);
+				}else{
+						print OUTPOSI "$aid\t$alined\t$aposi_out\n$bid\t$alined\t$bposi_out\n$did\t$alined\t$dposi_out\n";
 				}
 		}
 		my($alen,$blen,$dlen,$alignlen)=(length($afa{$aid}{seq}),length($bfa{$bid}{seq}),length($dfa{$did}{seq}),length($afa));
@@ -59,6 +74,7 @@ while(<IN>){
 }
 close IN;
 close OUT;
+close OUTPOSI;
 unlink $outfa;
 
 
