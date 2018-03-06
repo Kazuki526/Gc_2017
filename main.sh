@@ -48,3 +48,11 @@ perl check_all_aligned_cds_out_same_region.pl singlecopy_CS_cds/perfectly_single
 #print out ABD_identical.fa
 perl pick_ABD_identical_fa.pl ABD_identical_remove_same_seq.tsv
 
+#mapping 
+perl mapping.pl
+
+#call each mutation
+zsh abd_call.zsh
+
+
+

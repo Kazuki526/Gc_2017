@@ -9,8 +9,9 @@ my %afa = &fasta2hash("singlecopy_CS_cds/mostlysinglecopyA.fa");
 my %bfa = &fasta2hash("singlecopy_CS_cds/mostlysinglecopyB.fa");
 my %dfa = &fasta2hash("singlecopy_CS_cds/mostlysinglecopyD.fa");
 
+mkdir "ABD_identical_fa";
 open(IN,"$ARGV[0]");
-open(OUT,">ABD_identical.fa");
+open(OUT,">ABD_identical_fa/ABD_identical.fa");
 <IN>;
 while(<IN>){
 		chomp;
