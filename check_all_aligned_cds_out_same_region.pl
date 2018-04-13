@@ -22,7 +22,7 @@ my ($outfa,$outnum,$outnucle)=("temporary.fa",0,0);
 open(OUT,">ABD_identical_remove_same_seq.tsv");
 open(OUTPOSI,">ABD_identical_aligned_position.tsv");
 print OUT "aid\tbid\tdid\ta_length\tb_length\td_length\taligned_length\tsame_region\tdistinguishable_length\n";
-print OUTPOSI "chr\talined_posi\tposi\n";
+print OUTPOSI "chr\talined_posi\tposi\tA_genome\tB_genome\tD_genome\n";
 while(<IN>){
 		chomp;
 		my @line = split(/\t/,);
@@ -43,15 +43,16 @@ while(<IN>){
 				if(substr($dfa,$alined,1) ne "-"){$dposi++;$dposi_out=$dposi;}else{$dposi_out="NA";}
 				if((substr($afa,$alined-1,100) eq substr($bfa,$alined-1,100))||
 				   (substr($bfa,$alined-1,100) eq substr($dfa,$alined-1,100))||
-				   (substr($dfa,$alined-1,100) eq substr($afa,$aliend-1,100))){
+				   (substr($dfa,$alined-1,100) eq substr($afa,$alined-1,100))){
 						$focal++;push(@error_start,$alined);
 				}elsif(($alined < 100)&&((substr($afa,0,$alined) eq substr($bfa,0,$alined))||
 										 (substr($bfa,0,$alined) eq substr($dfa,0,$alined))||
-										 (substr($dfa,0,$alined) eq substr($afa,0,$aliend)))){
+										 (substr($dfa,0,$alined) eq substr($afa,0,$alined)))){
 						$focal++;push(@error_start,$alined);
-				}else{
-						print OUTPOSI "$aid\t$alined\t$aposi_out\n$bid\t$alined\t$bposi_out\n$did\t$alined\t$dposi_out\n";
-				}
+				}elsif($error_start[$#error_start] + 100  < $alined){
+						my ($a_,$b_,$d_) = (substr($afa,$alined-1,1),substr($bfa,$alined-1,1),substr($dfa,$alined-1,1));
+						print OUTPOSI "$aid\t$alined\t$aposi_out\t$a_\t$b_\t$d_\n$bid\t$alined\t$bposi_out\t$a_\t$b_\t$d_\n$did\t$alined\t$dposi_out\t$a_\t$b_\t$d_\n";
+				}else{$focal++;}
 		}
 		my($alen,$blen,$dlen,$alignlen)=(length($afa{$aid}{seq}),length($bfa{$bid}{seq}),length($dfa{$did}{seq}),length($afa));
 		if($focal==0){
@@ -65,10 +66,10 @@ while(<IN>){
 								$start=$erst;$end=$erst+100;
 						}elsif($end == 0){
 								$start = $erst;$end = $erst +100;
-						}else{$end = $erst +100;
+						}else{if($erst +100 <$alignlen){$end = $erst +100;}else{$end = $alignlen;}
 						}
 				}
-				$start++;$end++;push(@error,"$start-$end");$error_length += $end - $start +1;
+				push(@error,"$start-$end");$error_length += $end - $start +1;
 				print OUT "$aid\t$bid\t$did\t$alen\t$blen\t$dlen\t$alignlen\t" . join(";",@error) . "\t" . ($alignlen - $error_length) . "\n";
 		}
 }
