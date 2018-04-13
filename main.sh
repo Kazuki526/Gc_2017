@@ -2,6 +2,7 @@
 
 #install nkf & BLAST & R & mafft
 
+#high conf と low confをABD genome別々に分ける
 mkdir CS_cds
 perl divide_ABD.pl Chinese_Spring/Annotation/iwgsc_refseqv1.0_HighConf_REPR_CDS_2017Apr03.fa.zip Chinese_Spring/Annotation/iwgsc_refseqv1.0_HighConf_CDS_2017Mar13.fa.zip CS_cds/CS_HC
 perl divide_ABD.pl Chinese_Spring/Annotation/iwgsc_refseqv1.0_LowConf_REPR_CDS_2017Apr03.fa.zip Chinese_Spring/Annotation/iwgsc_refseqv1.0_LowConf_CDS_2017Mar13.fa.zip CS_cds/CS_LC
@@ -24,6 +25,7 @@ makeblastdb -in DB/HLmix/CS_HLC_repr_cdsD.fa -out DB/HLmix/CS_HLC_repr_cdsD -dbt
 #blastn -db DB/HLmix/CS_HLC_repr_cdsD -query CS_HC_repr_cdsD.fa -out blastDH2DHL.tsv -outfmt 6 -evalue 1e-6
 
 ##### High & Low Conf blast #####
+#high conf & Low conf X high lowでblast
 echo "run blast to remove duplicated CDS"
 blastn -db DB/HLmix/CS_HLC_repr_cdsA -query DB/HLmix/CS_HLC_repr_cdsA.fa -out blastAHL2AHL.tsv -outfmt 6 -evalue 1e-6
 blastn -db DB/HLmix/CS_HLC_repr_cdsB -query DB/HLmix/CS_HLC_repr_cdsB.fa -out blastBHL2BHL.tsv -outfmt 6 -evalue 1e-6
